@@ -6,9 +6,9 @@ require 'recipe/typo3.php';
 set('repository', 'git@github.com:maidem/taekwondo-mueller.git');
 
 host('live')
-    ->set('hostname', getenv('DEPLOY_HOST') ?: 'ssh.isenstedt.project.host')
-    ->set('remote_user', getenv('DEPLOY_USER') ?: 'maik.demuth@outlook.com@a-gzfyfw')
-    ->set('deploy_path', getenv('DEPLOY_PATH') ?: '/html/typo3-wuuy9')
+    ->set('hostname', getenv('DEPLOY_HOST') ?: 'example.com')
+    ->set('remote_user', getenv('DEPLOY_USER') ?: 'username')
+    ->set('deploy_path', getenv('DEPLOY_PATH') ?: 'path to your project')
     ->set('branch', getenv('DEPLOY_BRANCH') ?: 'main')
     ->set('identity_file', '~/.ssh/id_ed25519');
 
