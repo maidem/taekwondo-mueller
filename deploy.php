@@ -45,6 +45,8 @@ host('live')
     // Wichtig: Muss mit Workflow-Key-Datei übereinstimmen!
     ->set('identity_file', '~/.ssh/id_ed25519_deployer');
 
+set('git_ssh_command', 'ssh -i ~/.ssh/id_ed25519_deployer -o StrictHostKeyChecking=accept-new');
+
 /* ----------------------------------------------------------
  | Custom Tasks
  * --------------------------------------------------------*/
