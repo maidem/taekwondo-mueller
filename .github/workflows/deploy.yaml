@@ -20,7 +20,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Deployer nutzt ggf. Tags/Releases
+          fetch-depth: 0
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -29,14 +29,10 @@ jobs:
           extensions: mbstring, intl, json, xml, curl, gd, pdo_mysql
           coverage: none
 
-      # Prüft die composer.json im Backend-Projekt
       - name: Validate composer.json / composer.lock
-        working-directory: backend
         run: composer validate --no-check-all --strict
 
-      # Install mit Dev-Abhängigkeiten -> Deployer wird installiert
       - name: Install Composer dependencies
-        working-directory: backend
         env:
           COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH_JSON }}
         run: |
@@ -45,7 +41,6 @@ jobs:
             --no-interaction \
             --prefer-dist \
             --optimize-autoloader
-          # KEIN --no-dev! Deployer liegt in require-dev.
 
       - name: Setup SSH
         shell: bash
@@ -63,7 +58,6 @@ jobs:
           ssh -i ~/.ssh/id_ed25519_deployer -o BatchMode=yes -o StrictHostKeyChecking=yes "${DEPLOY_USER}@${DEPLOY_HOST}" 'echo "Connected as $(whoami)"'
 
       - name: Deploy to Live Server (Deployer)
-        working-directory: backend
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
