@@ -4,33 +4,60 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch: {}
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+      DEPLOY_BRANCH: ${{ secrets.DEPLOY_BRANCH }}
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Deployer nutzt ggf. Tags/Releases
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
+          extensions: mbstring, intl, json, xml, curl, gd, pdo_mysql
+          coverage: none
+
+      - name: Validate composer.json / composer.lock
+        run: composer validate --no-check-all --strict
 
       - name: Install Composer dependencies
-        run: composer install --no-progress --no-interaction --prefer-dist
+        env:
+          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH_JSON }}
+        run: |
+          composer install \
+            --no-progress \
+            --no-interaction \
+            --prefer-dist \
+            --optimize-autoloader \
+            --no-dev
 
       - name: Setup SSH
+        shell: bash
         run: |
           mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519_deployer
           chmod 600 ~/.ssh/id_ed25519_deployer
-          ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+          # Known Hosts eintragen (verhindert Host-Authentifizitäts-Prompt)
+          ssh-keyscan -H "${DEPLOY_HOST}" >> ~/.ssh/known_hosts 2>/dev/null
+          chmod 644 ~/.ssh/known_hosts
 
-      - name: Deploy to Live Server
-        env:
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-          DEPLOY_BRANCH: ${{ secrets.DEPLOY_BRANCH }}
-        run: vendor/bin/dep deploy live --no-interaction
+      - name: Test SSH Connectivity
+        shell: bash
+        run: |
+          ssh -i ~/.ssh/id_ed25519_deployer -o BatchMode=yes -o StrictHostKeyChecking=yes "${DEPLOY_USER}@${DEPLOY_HOST}" 'echo "Connected as $(whoami)"'
+
+      - name: Deploy to Live Server (Deployer)
+        run: vendor/bin/dep deploy live --no-interaction -vvv

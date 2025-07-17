@@ -3,22 +3,54 @@ namespace Deployer;
 
 require 'recipe/typo3.php';
 
+// --- Basis-Repo ---
 set('repository', 'git@github.com:maidem/taekwondo-mueller.git');
 
+// Optional: shallow clone deaktivieren (sicherer bei Tags, History)
+set('git_tty', true); // interaktive Auth braucht man selten, aber TTY schadet nicht
+set('writable_mode', 'chmod'); // oder acl/fastcgi, je nach Server
+
+// Shared dirs/files (TYPO3 spezifisch anpassen)
+set('shared_dirs', [
+    'var',           // TYPO3 var/ (Caches, Logs, Sessions)
+    'public/fileadmin',
+    'public/uploads',
+]);
+
+set('shared_files', [
+    '.env',          // Falls du env-Dateien nutzt
+    'public/typo3conf/LocalConfiguration.php',
+    'public/typo3conf/AdditionalConfiguration.php',
+]);
+
+// Writable dirs (Webserver braucht Schreibrechte)
+set('writable_dirs', [
+    'var',
+    'public/fileadmin',
+    'public/uploads',
+]);
+
+// PHP Pfad auf dem Server (ggf. anpassen)
+set('bin/php', '/usr/local/bin/php');
+
+// Webroot relativ zum Release-Pfad
+set('web_path', 'public/');
+
+// Host-Definition (über GitHub-Umgebungsvariablen überschreibbar)
 host('live')
     ->set('hostname', getenv('DEPLOY_HOST') ?: 'example.com')
     ->set('remote_user', getenv('DEPLOY_USER') ?: 'username')
-    ->set('deploy_path', getenv('DEPLOY_PATH') ?: 'path to your project')
+    ->set('deploy_path', getenv('DEPLOY_PATH') ?: '/var/www/your-project')
     ->set('branch', getenv('DEPLOY_BRANCH') ?: 'main')
-    ->set('identity_file', '~/.ssh/id_ed25519');
+    // Wichtig: Muss mit Workflow-Key-Datei übereinstimmen!
+    ->set('identity_file', '~/.ssh/id_ed25519_deployer');
 
-set('web_path', 'public/');
-set('bin/php', '/usr/local/bin/php');
+/* ----------------------------------------------------------
+ | Custom Tasks
+ * --------------------------------------------------------*/
 
-
-/**
- * Bereinigung von fehlerhaften Releases
- */
+// Bereinigung von (halb-)angelegten Releases
+// (Nützlich, wenn Deployer abbricht, bevor alles erstellt ist)
 task('deploy:clean_release', function () {
     $nextRelease = (int)get('release_name') ?: count(get('releases_list')) + 1;
     if (test("[ -d {{deploy_path}}/releases/{$nextRelease} ]")) {
@@ -26,19 +58,15 @@ task('deploy:clean_release', function () {
     }
 });
 
-/**
- * Erzwungenes Entsperren bei fehlgeschlagenem Deployment
- */
+// Erzwungenes Entsperren bei fehlgeschlagenem Deployment
 task('deploy:force_unlock', function () {
-    if (test("[ -f {{deploy_path}}/.dep/deploy.lock ]")) {
-        run("rm -f {{deploy_path}}/.dep/deploy.lock");
+    if (test('[ -f {{deploy_path}}/.dep/deploy.lock ]')) {
+        run('rm -f {{deploy_path}}/.dep/deploy.lock');
     }
 });
 
-/**
- * Löscht alte Releases und hält maximal 5 Versionen
- */
-task('cleanup', function () {
+// Eigene Cleanup-Strategie: halte max. 5 Releases
+task('cleanup:custom', function () {
     $releases = get('releases_list');
     $keep = 5;
     if (count($releases) <= $keep) {
@@ -50,37 +78,33 @@ task('cleanup', function () {
     }
 });
 
-/**
- * TYPO3 Cache leeren
- */
+// TYPO3 Cache Flush nach Deployment
 task('typo3:cache:flush', function () {
     run('{{bin/php}} {{release_path}}/vendor/bin/typo3 cache:flush');
 });
 
-/**
- * Deployment-Workflow
- */
+/* ----------------------------------------------------------
+ | Haupt-Deploy-Flow
+ * --------------------------------------------------------*/
+
+desc('Deployment');
 task('deploy', [
-    'deploy:prepare',
-    'deploy:force_unlock',
-    'deploy:lock',
+    'deploy:prepare',      // erstellt Releases/Shared-Struktur
+    'deploy:force_unlock', // sicherheitshalber
+    'deploy:lock',         // lock
     'deploy:clean_release',
     'deploy:release',
-    'deploy:update_code',
-    'deploy:vendors',
+    'deploy:update_code',  // git clone/checkout
+    'deploy:vendors',      // composer install auf Server (optional, wenn du vendor mitlieferst, entfernen)
     'deploy:shared',
     'deploy:writable',
     'deploy:symlink',
     'deploy:unlock',
-    'cleanup',
+    'cleanup:custom',      // alte Releases weg
 ]);
 
-/**
- * Führe Cache Flush nach erfolgreichem Deployment aus
- */
+// Nach erfolgreichem Deployment: TYPO3 Cache flushen
 after('deploy', 'typo3:cache:flush');
 
-/**
- * Falls ein Deployment fehlschlägt, entferne den Lock
- */
+// Falls Deployment fehlschlägt: Lock entfernen
 after('deploy:failed', 'deploy:unlock');
