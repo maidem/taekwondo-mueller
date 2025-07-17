@@ -36,7 +36,7 @@ jobs:
 
       # Install mit Dev-Abhängigkeiten -> Deployer wird installiert
       - name: Install Composer dependencies
-        working-directory: portfolio-v2/backend
+        working-directory: backend
         env:
           COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH_JSON }}
         run: |
