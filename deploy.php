@@ -45,7 +45,33 @@ host('live')
     // Wichtig: Muss mit Workflow-Key-Datei übereinstimmen!
     ->set('identity_file', '~/.ssh/id_ed25519_deployer');
 
+// Erzwingt, dass git auf dem Remote-Server den korrekten SSH-Key nutzt (wichtig für update_code)
+// Für Produktion ggf. Fingerprint-Pinning ergänzen.
 set('git_ssh_command', 'ssh -i ~/.ssh/id_ed25519_deployer -o StrictHostKeyChecking=accept-new');
+
+// Robustere Code-Aktualisierung: direktes Clone pro Release statt Mirror+remote update
+set('update_code_strategy', 'clone');
+
+// Shallow-Clone für Geschwindigkeit; volle History? -> auf 0 oder false ändern
+set('git_depth', 1);
+
+// --- Direktes Git-Clone statt Mirror/Fetch (override deploy:update_code) ---
+// Nutzt git_ssh_command (oben gesetzt). Shallow via git_depth.
+// Entfernt Deployer-Mirror (\.dep\/repo) & das fehlerhafte 'git remote update'.
+task('deploy:update_code', function () {
+    $depth = get('git_depth');
+    $depthFlag = '';
+    if (is_numeric($depth) && (int)$depth > 0) {
+        $depthFlag = '--depth='.(int)$depth;
+    }
+    $repository = get('repository');
+    $branch     = get('branch');
+    // Clone direkt in das vorbereitete Release-Verzeichnis.
+    $cmd = trim("git clone $depthFlag --single-branch --branch $branch $repository {{release_path}}");
+    run($cmd);
+    // Optional: Git-Metadaten nach dem Clone entfernen (wenn auf Prod nicht nötig)
+    // run('rm -rf {{release_path}}/.git');
+});
 
 /* ----------------------------------------------------------
  | Custom Tasks
