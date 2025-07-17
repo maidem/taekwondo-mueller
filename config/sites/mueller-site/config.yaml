@@ -1,0 +1,31 @@
+base: /
+dependencies:
+  - typo3/fluid-styled-content
+  - taekwondo-mueller/taekwondomueller-sitepackage
+  - typo3/form
+  - typo3/seo-sitemap
+languages:
+  -
+    title: Deutsch
+    enabled: true
+    locale: de_DE.utf8
+    hreflang: ''
+    base: /
+    websiteTitle: ''
+    navigationTitle: Deutsch
+    flag: de
+    languageId: 0
+  -
+    title: Englisch
+    enabled: true
+    locale: en_GB.utf8
+    hreflang: ''
+    base: /en/
+    websiteTitle: ''
+    navigationTitle: ''
+    fallbackType: strict
+    fallbacks: ''
+    flag: en-us-gb
+    languageId: 1
+rootPageId: 1
+websiteTitle: ''
