@@ -29,10 +29,14 @@ jobs:
           extensions: mbstring, intl, json, xml, curl, gd, pdo_mysql
           coverage: none
 
+      # Prüft die composer.json im Backend-Projekt
       - name: Validate composer.json / composer.lock
+        working-directory: portfolio-v2/backend
         run: composer validate --no-check-all --strict
 
+      # Install mit Dev-Abhängigkeiten -> Deployer wird installiert
       - name: Install Composer dependencies
+        working-directory: portfolio-v2/backend
         env:
           COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH_JSON }}
         run: |
@@ -40,8 +44,8 @@ jobs:
             --no-progress \
             --no-interaction \
             --prefer-dist \
-            --optimize-autoloader \
-            --no-dev
+            --optimize-autoloader
+          # KEIN --no-dev! Deployer liegt in require-dev.
 
       - name: Setup SSH
         shell: bash
@@ -50,7 +54,6 @@ jobs:
           chmod 700 ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519_deployer
           chmod 600 ~/.ssh/id_ed25519_deployer
-          # Known Hosts eintragen (verhindert Host-Authentifizitäts-Prompt)
           ssh-keyscan -H "${DEPLOY_HOST}" >> ~/.ssh/known_hosts 2>/dev/null
           chmod 644 ~/.ssh/known_hosts
 
@@ -60,4 +63,10 @@ jobs:
           ssh -i ~/.ssh/id_ed25519_deployer -o BatchMode=yes -o StrictHostKeyChecking=yes "${DEPLOY_USER}@${DEPLOY_HOST}" 'echo "Connected as $(whoami)"'
 
       - name: Deploy to Live Server (Deployer)
+        working-directory: portfolio-v2/backend
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_BRANCH: ${{ secrets.DEPLOY_BRANCH }}
         run: vendor/bin/dep deploy live --no-interaction -vvv
