@@ -31,7 +31,7 @@ jobs:
 
       # Prüft die composer.json im Backend-Projekt
       - name: Validate composer.json / composer.lock
-        working-directory: portfolio-v2/backend
+        working-directory: backend
         run: composer validate --no-check-all --strict
 
       # Install mit Dev-Abhängigkeiten -> Deployer wird installiert
@@ -63,7 +63,7 @@ jobs:
           ssh -i ~/.ssh/id_ed25519_deployer -o BatchMode=yes -o StrictHostKeyChecking=yes "${DEPLOY_USER}@${DEPLOY_HOST}" 'echo "Connected as $(whoami)"'
 
       - name: Deploy to Live Server (Deployer)
-        working-directory: portfolio-v2/backend
+        working-directory: backend
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
