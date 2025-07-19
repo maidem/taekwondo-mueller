@@ -1,0 +1,5 @@
+name: taekwondo-mueller/taekwondomueller-sitepackage
+label: 'taekwondomueller sitepackage'
+dependencies:
+  - typo3/fluid-styled-content
+  - typo3/fluid-styled-content-css
