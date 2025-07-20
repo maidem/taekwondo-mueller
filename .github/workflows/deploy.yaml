@@ -37,13 +37,13 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519_deployer
-          chmod 600 ~/.ssh/id_ed25519_deployer
-          ssh-keyscan -H mittwald.de >> ~/.ssh/known_hosts
+          echo "${{ secrets.TAEKWONDO_DEPLOYER_PRIVATE_KEY }}" > ~/.ssh/taekwondo-deployer
+          chmod 600 ~/.ssh/taekwondo-deployer
+          ssh-keyscan -H ssh.isenstedt.project.host >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
       - name: Test SSH Connectivity
-        run: ssh -i ~/.ssh/id_ed25519_deployer -o BatchMode=yes -o StrictHostKeyChecking=yes deployer@mittwald.de 'echo "Connected as $(whoami)"'
+        run: ssh -i ~/.ssh/taekwondo-deployer -o BatchMode=yes -o StrictHostKeyChecking=yes taekwondo-deployer@ssh.isenstedt.project.host 'echo "Connected as $(whoami)"'
 
       - name: Deploy to Mittwald
         run: vendor/bin/dep deploy mittwald --branch=${{ env.DEPLOY_BRANCH }} --no-interaction -vvv
