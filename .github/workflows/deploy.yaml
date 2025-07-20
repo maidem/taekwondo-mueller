@@ -47,8 +47,18 @@ jobs:
           ssh-keyscan -H ssh.isenstedt.project.host >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
-      - name: Test SSH Connectivity
-        run: ssh -i ~/.ssh/taekwondo-deployer -o BatchMode=yes -o StrictHostKeyChecking=yes maik.demuth@outlook.com@a-gzfyfw@ssh.isenstedt.project.host 'echo "Connected as $(whoami)"'
+      # DEBUG-SCHRITT
+      - name: Debug SSH & Key
+        run: |
+          echo "=== SSH Version ==="
+          ssh -V || true
+
+          echo "=== Test Key Permissions ==="
+          ls -l ~/.ssh || true
+          ls -l ~/.ssh/taekwondo-deployer || true
+
+          echo "=== Test SSH Connection ==="
+          ssh -i ~/.ssh/taekwondo-deployer -o StrictHostKeyChecking=no -v "${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}" "echo 'SSH OK'"
 
       - name: Deploy to Production
         run: vendor/bin/dep deploy production --branch=${{ env.DEPLOY_BRANCH }} --no-interaction -vvv
