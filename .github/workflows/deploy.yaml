@@ -33,17 +33,20 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
+      - name: Install Deployer
+        run: composer require deployer/deployer --dev
+
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
           echo "${{ secrets.TAEKWONDO_DEPLOYER_PRIVATE_KEY }}" > ~/.ssh/taekwondo-deployer
           chmod 600 ~/.ssh/taekwondo-deployer
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ssh.isenstedt.project.host >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
       - name: Test SSH Connectivity
-        run: ssh -i ~/.ssh/taekwondo-deployer -o BatchMode=yes -o StrictHostKeyChecking=yes ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'echo "Connected as $(whoami)"'
+        run: ssh -i ~/.ssh/taekwondo-deployer -o BatchMode=yes -o StrictHostKeyChecking=yes taekwondo-deployer@ssh.isenstedt.project.host 'echo "Connected as $(whoami)"'
 
       - name: Deploy to Mittwald
         run: vendor/bin/dep deploy mittwald --branch=${{ env.DEPLOY_BRANCH }} --no-interaction -vvv
