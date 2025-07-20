@@ -10,7 +10,7 @@ set('mittwald_token', getenv('MITTWALD_API_TOKEN'));
 // Repository
 set('repository', 'git@github.com:maidem/taekwondo-mueller.git');
 
-// PHP Version für Mittwald
+// PHP Version für Mittwald Projekt
 set('php_version', '8.4');
 
 // Mittwald App Host
