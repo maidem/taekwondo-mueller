@@ -46,7 +46,7 @@ jobs:
           chmod 644 ~/.ssh/known_hosts
 
       - name: Test SSH Connectivity
-        run: ssh -i ~/.ssh/taekwondo-deployer -o BatchMode=yes -o StrictHostKeyChecking=yes taekwondo-deployer@ssh.isenstedt.project.host 'echo "Connected as $(whoami)"'
+        run: ssh -i ~/.ssh/taekwondo-deployer -o BatchMode=yes -o StrictHostKeyChecking=yes maik.demuth@outlook.com@a-gzfyfw@ssh.isenstedt.project.host 'echo "Connected as $(whoami)"'
 
       - name: Deploy to Mittwald
         run: vendor/bin/dep deploy mittwald --branch=${{ env.DEPLOY_BRANCH }} --no-interaction -vvv
