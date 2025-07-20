@@ -120,6 +120,7 @@ return [
         'sitename' => 'taekwondo-mueller.de',
         'systemMaintainers' => [
             1,
+            1,
         ],
     ],
 ];

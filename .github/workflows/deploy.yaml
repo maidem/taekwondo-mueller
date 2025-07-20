@@ -1,31 +1,29 @@
-name: Deploy to Live Server
+name: Deploy to Mittwald
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch: {}
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     env:
-      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-      DEPLOY_BRANCH: ${{ secrets.DEPLOY_BRANCH }}
+      MITTWALD_API_TOKEN: ${{ secrets.MITTWALD_API_TOKEN }}
+      DEPLOY_BRANCH: main
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Deployer nutzt ggf. Tags/Releases
+          fetch-depth: 0
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: "8.4"
           extensions: mbstring, intl, json, xml, curl, gd, pdo_mysql
           coverage: none
 
@@ -33,31 +31,19 @@ jobs:
         run: composer validate --no-check-all --strict
 
       - name: Install Composer dependencies
-        env:
-          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH_JSON }}
-        run: |
-          composer install \
-            --no-progress \
-            --no-interaction \
-            --prefer-dist \
-            --optimize-autoloader \
-            --no-dev
+        run: composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
       - name: Setup SSH
-        shell: bash
         run: |
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519_deployer
           chmod 600 ~/.ssh/id_ed25519_deployer
-          # Known Hosts eintragen (verhindert Host-Authentifizitäts-Prompt)
-          ssh-keyscan -H "${DEPLOY_HOST}" >> ~/.ssh/known_hosts 2>/dev/null
+          ssh-keyscan -H mittwald.de >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
       - name: Test SSH Connectivity
-        shell: bash
-        run: |
-          ssh -i ~/.ssh/id_ed25519_deployer -o BatchMode=yes -o StrictHostKeyChecking=yes "${DEPLOY_USER}@${DEPLOY_HOST}" 'echo "Connected as $(whoami)"'
+        run: ssh -i ~/.ssh/id_ed25519_deployer -o BatchMode=yes -o StrictHostKeyChecking=yes deployer@mittwald.de 'echo "Connected as $(whoami)"'
 
-      - name: Deploy to Live Server (Deployer)
-        run: vendor/bin/dep deploy live --no-interaction -vvv
+      - name: Deploy to Mittwald
+        run: vendor/bin/dep deploy mittwald --branch=${{ env.DEPLOY_BRANCH }} --no-interaction -vvv
