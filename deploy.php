@@ -1,31 +1,19 @@
 <?php
+
 namespace Deployer;
 
-require __DIR__ . '/vendor/autoload.php';
-require __DIR__ . '/vendor/mittwald/deployer-recipes/recipes/deploy.php';
+require 'recipe/typo3.php';
 
-// Mittwald API Token (alternativ Umgebungsvariable MITTWALD_API_TOKEN setzen)
-set('mittwald_token', getenv('MITTWALD_API_TOKEN'));
-
-// Repository
 set('repository', 'git@github.com:maidem/taekwondo-mueller.git');
+set('shared_files', []);
+set('shared_dirs', []);
+set('writable_dirs', []);
+set('allow_anonymous_stats', false);
 
-// PHP Version für Mittwald Projekt
-set('php_version', '8.4');
+host('production')
+    ->set('hostname', getenv('DEPLOY_HOST'))
+    ->set('remote_user', getenv('DEPLOY_USER'))
+    ->set('deploy_path', getenv('DEPLOY_PATH'))
+    ->set('identity_file', '~/.ssh/taekwondo-deployer');
 
-// Mittwald App Host
-mittwald_app('p-cv7flj') // Ersetze mit deiner UUID oder Kurz-ID
-    ->set('public_path', '/')             // Pfad auf Mittwald-Server, meist '/'
-    ->set('mittwald_app_dependencies', [
-        'php'      => '{{php_version}}',
-        'gm'       => '*',
-        'composer' => '*',
-    ]);
-
-// Gemeinsame Dateien/Ordner (optional anpassen)
-add('shared_files', []);
-add('shared_dirs', []);
-add('writable_dirs', []);
-
-// Hooks
 after('deploy:failed', 'deploy:unlock');

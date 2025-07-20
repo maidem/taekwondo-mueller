@@ -11,7 +11,9 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      MITTWALD_API_TOKEN: ${{ secrets.MITTWALD_API_TOKEN }}
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
       DEPLOY_BRANCH: main
 
     steps:
@@ -48,5 +50,5 @@ jobs:
       - name: Test SSH Connectivity
         run: ssh -i ~/.ssh/taekwondo-deployer -o BatchMode=yes -o StrictHostKeyChecking=yes maik.demuth@outlook.com@a-gzfyfw@ssh.isenstedt.project.host 'echo "Connected as $(whoami)"'
 
-      - name: Deploy to Mittwald
-        run: vendor/bin/dep deploy mittwald --branch=${{ env.DEPLOY_BRANCH }} --no-interaction -vvv
+      - name: Deploy to Production
+        run: vendor/bin/dep deploy production --branch=${{ env.DEPLOY_BRANCH }} --no-interaction -vvv
