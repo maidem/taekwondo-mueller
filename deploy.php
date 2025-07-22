@@ -1,107 +1,84 @@
 <?php
-
 namespace Deployer;
 
-require 'recipe/typo3.php';
+require 'recipe/common.php';
 
-// -----------------------------------------------------------------------------
-// Basis
-// -----------------------------------------------------------------------------
+// --- Projekt ---
+set('application', 'taekwondo-mueller');
 set('repository', 'git@github.com:maidem/taekwondo-mueller.git');
-set('shared_files', []);
-set('shared_dirs', []);
-set('writable_dirs', []);
+
+// Branch aus Secret, sonst main.
+set('branch', function () {
+    return getenv('DEPLOY_BRANCH') ?: 'main';
+});
+
+// PHP-Binary auf dem Server (du hast 8.4 installiert).
+set('bin/php', '/usr/bin/php8.4');
+
+// TYPO3-Verzeichnisstruktur (Composer-basierte Installs, public/ Webroot)
+set('shared_dirs', [
+    'public/fileadmin',
+    'public/uploads',
+    'public/typo3temp',
+    'var',
+]);
+set('shared_files', [
+    // Lege hier Dateien ab, die server-spezifisch sind:
+    'config/system/additional.php',
+    'public/.htaccess',
+    'public/.user.ini'
+]);
+set('writable_dirs', [
+    'var',
+    'public/fileadmin',
+    'public/uploads',
+]);
 set('allow_anonymous_stats', false);
+set('keep_releases', 5);
+set('ssh_private_key', getenv('SSH_PRIVATE_KEY'));
+// --- Host Definition (aus GitHub Secrets via ENV) ---
+host('live')
+    ->set('hostname', getenv('DEPLOY_HOST') ?: 'example.com')
+    ->set('remote_user', getenv('DEPLOY_USER') ?: 'deployer')
+    ->set('deploy_path', getenv('DEPLOY_PATH') ?: '/var/www/html/typo3');
 
-// SSH für Git (mehr Debug + strikte Key-Nutzung)
-set('git_ssh_command', 'ssh -i ~/.ssh/taekwondo-deployer -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=~/.ssh/known_hosts');
-
-// Host
-host('production')
-    ->set('hostname', getenv('DEPLOY_HOST'))
-    ->set('remote_user', getenv('DEPLOY_USER'))
-    ->set('deploy_path', getenv('DEPLOY_PATH'))
-    ->set('identity_file', '~/.ssh/taekwondo-deployer');
-
-// -----------------------------------------------------------------------------
-// SSH vorbereiten (GitHub Key eintragen)
-// -----------------------------------------------------------------------------
-task('deploy:prepare_ssh', function () {
-    run('mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts');
-});
-before('deploy:update_code', 'deploy:prepare_ssh');
-
-// -----------------------------------------------------------------------------
-// DEBUG: Config + Umgebung anzeigen
-// -----------------------------------------------------------------------------
-desc('Debug: zeige Deployer-Variablen');
-task('debug:config', function () {
-    writeln('--- DEBUG CONFIG ---');
-    writeln('host: {{hostname}}');
-    writeln('user: {{remote_user}}');
-    writeln('deploy_path: {{deploy_path}}');
-    writeln('repository: {{repository}}');
-    writeln('branch: ' . input()->getOption('branch'));
-    writeln('git_ssh_command: {{git_ssh_command}}');
-    writeln('--------------------');
+// --------------------------------------
+// TYPO3 Tasks
+// --------------------------------------
+desc('Flush TYPO3 cache');
+task('typo3:cache:flush', function () {
+    // Nach Symlink auf "current" ausführen.
+    run('{{bin/php}} {{current_path}}/vendor/bin/typo3 cache:flush || true');
 });
 
-// vor Deploy gleich mal zeigen
-before('deploy:info', 'debug:config');
+// Optional: Datenbankschema-Check (nur wenn gewünscht)
+// task('typo3:db:update', function () {
+//     run('{{bin/php}} {{current_path}}/vendor/bin/typo3 database:updateschema --no-interaction || true');
+// });
 
-// -----------------------------------------------------------------------------
-// DEBUG: Vor update_code – wer bin ich? welche Verzeichnisse?
-// -----------------------------------------------------------------------------
-desc('Debug: Remote-Check vor update_code');
-task('debug:pre_update_code', function () {
-    run("echo '--- PRE update_code ---'");
-    run("whoami || true");
-    run("pwd || true");
-    run("ls -la {{deploy_path}} || true");
-    run("ls -la {{deploy_path}}/.dep || true");
-    run("ls -la {{deploy_path}}/.dep/repo || true");
-    run("echo '----------------------'");
-});
-before('deploy:update_code', 'debug:pre_update_code');
-
-// -----------------------------------------------------------------------------
-// DEBUG: Nach update_code (wenn erfolgreich)
-// -----------------------------------------------------------------------------
-desc('Debug: Remote-Check nach update_code');
-task('debug:post_update_code', function () {
-    run("echo '--- POST update_code ---'");
-    run("cd {{deploy_path}}/.dep/repo && git remote -v || true");
-    run("cd {{deploy_path}}/.dep/repo && git show-ref --heads || true");
-    run("echo '------------------------'");
-});
-after('deploy:update_code', 'debug:post_update_code');
-
-// -----------------------------------------------------------------------------
-// DEBUG: Bei Fehler – Git neu testen + ggf. re-clone
-// -----------------------------------------------------------------------------
-desc('Debug: Sammle Infos nach fehlgeschlagenem Deploy & optional re-clonen');
-task('debug:on_fail', function () {
-    writeln('!!! DEPLOY FAILED – sammle Debug-Daten !!!');
-
-    // 1) Git-Verbindung direkt testen
-    runLocally("GIT_SSH_COMMAND=\"{{git_ssh_command}}\" git ls-remote {{repository}} || true");
-
-    // 2) Remote Git-Fetch im Fehlerfall (mit -v)
-    run("if [ -d {{deploy_path}}/.dep/repo ]; then "
-        . "cd {{deploy_path}}/.dep/repo && "
-        . "GIT_SSH_COMMAND='{{git_ssh_command}} -v' git fetch origin --prune || true; "
-        . "fi");
-
-    // 3) Optional Auto-Reclone (nur wenn ENV DEBUG_FORCE_RECLONE=1 gesetzt)
-    if (getenv('DEBUG_FORCE_RECLONE') === '1') {
-        run("echo 'FORCE RECLONE aktiviert'; rm -rf {{deploy_path}}/.dep/repo || true");
-    } else {
-        writeln('Setze DEBUG_FORCE_RECLONE=1 im CI, um automatisch neu zu klonen.');
-    }
-});
-after('deploy:failed', 'debug:on_fail');
-
-// -----------------------------------------------------------------------------
-// Standard-Fail-Unlock
-// -----------------------------------------------------------------------------
+// --------------------------------------
+// Hooks
+// --------------------------------------
+after('deploy:symlink', 'typo3:cache:flush');
 after('deploy:failed', 'deploy:unlock');
+after('deploy:update_code', 'deploy:vendors');
+
+// --------------------------------------
+// Rollback Task
+// --------------------------------------
+desc('Rollback to previous release');
+task('rollback', function () {
+    run('cd {{deploy_path}} && ln -nfs $(ls -td releases/* | sed -n 2p) current');
+});
+
+task('fix:permissions', function () {
+    run('chmod 2770 {{release_path}}');
+    run('chmod 2770 {{release_path}}/config');
+    run('chmod 2770 {{release_path}}/config/sites');
+    run('chmod 2770 {{release_path}}/config/system');
+    run('chmod 2770 {{release_path}}/public');
+    run('find {{release_path}} -type d -exec chmod 2770 {} +');
+    run('find {{release_path}} -type f -exec chmod 0660 {} +');
+});
+
+after('deploy:prepare', 'fix:permissions');
