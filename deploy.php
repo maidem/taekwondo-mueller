@@ -13,7 +13,7 @@ set('branch', function () {
 });
 
 // PHP-Binary auf dem Server (du hast 8.4 installiert).
-set('bin/php', '/usr/bin/php8.4');
+set('bin/php', '/usr/local/bin/php');
 
 // TYPO3-Verzeichnisstruktur (Composer-basierte Installs, public/ Webroot)
 set('shared_dirs', [
