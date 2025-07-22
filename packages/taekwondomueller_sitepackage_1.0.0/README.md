@@ -1,1 +1,1 @@
-# Site Package for the project "taekwondomueller sitepackage"
+# taekwondo-mueller.de Projekt
