@@ -58,8 +58,21 @@ desc('Set correct permissions');
 task('fix:permissions', function () {
     run('find {{release_path}} -type d -exec chmod 2770 {} +');
     run('find {{release_path}} -type f -exec chmod 0660 {} +');
+    // Auch die shared-Verzeichnisse anpassen:
+    $sharedDirs = [
+        '{{deploy_path}}/shared/public/fileadmin',
+        '{{deploy_path}}/shared/public/uploads',
+        '{{deploy_path}}/shared/public/typo3temp',
+        '{{deploy_path}}/shared/var',
+    ];
+    foreach ($sharedDirs as $dir) {
+        run("if [ -d $dir ]; then find $dir -type d -exec chmod 2770 {} +; find $dir -type f -exec chmod 0660 {} +; fi");
+    }
     // Optional: Setze die Gruppe, falls nötig (z.B. www-data)
     // run('chown -R :www-data {{release_path}}');
+    // foreach ($sharedDirs as $dir) {
+    //     run("if [ -d $dir ]; then chown -R :www-data $dir; fi");
+    // }
 });
 
 // --------------------------------------
