@@ -1,1 +1,1 @@
-# taekwondo-mueller.de project
+# taekwondo-mueller.de project beta
