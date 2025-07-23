@@ -51,14 +51,23 @@ task('typo3:cache:flush', function () {
     run('{{bin/php}} {{current_path}}/vendor/bin/typo3 cache:flush || true');
 });
 
-// Optional: Datenbankschema-Check (nur wenn gewünscht)
-// task('typo3:db:update', function () {
-//     run('{{bin/php}} {{current_path}}/vendor/bin/typo3 database:updateschema --no-interaction || true');
-// });
+// --------------------------------------
+// Permissions Task
+// --------------------------------------
+desc('Set correct permissions');
+task('fix:permissions', function () {
+    run('find {{release_path}} -type d -exec chmod 2770 {} +');
+    run('find {{release_path}} -type f -exec chmod 0660 {} +');
+    // Optional: Setze die Gruppe, falls nötig (z.B. www-data)
+    // run('chown -R :www-data {{release_path}}');
+});
 
 // --------------------------------------
 // Hooks
 // --------------------------------------
+after('deploy:prepare', 'fix:permissions');
+after('deploy:symlink', 'fix:permissions');
+after('deploy:success', 'fix:permissions');
 after('deploy:symlink', 'typo3:cache:flush');
 after('deploy:failed', 'deploy:unlock');
 after('deploy:update_code', 'deploy:vendors');
@@ -69,11 +78,7 @@ after('deploy:update_code', 'deploy:vendors');
 desc('Rollback to previous release');
 task('rollback', function () {
     run('cd {{deploy_path}} && ln -nfs $(ls -td releases/* | sed -n 2p) current');
+    // Nach Rollback auch Rechte und Cache setzen
+    invoke('fix:permissions');
+    invoke('typo3:cache:flush');
 });
-
-task('fix:permissions', function () {
-    run('find {{release_path}} -type d -exec chmod 2770 {} +');
-    run('find {{release_path}} -type f -exec chmod 0660 {} +');
-});
-
-after('deploy:prepare', 'fix:permissions');
