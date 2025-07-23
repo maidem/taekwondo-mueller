@@ -21,6 +21,7 @@ set('shared_dirs', [
     'public/uploads',
     'public/typo3temp',
     'var',
+    'var/session',
 ]);
 set('shared_files', [
     // Lege hier Dateien ab, die server-spezifisch sind:
@@ -72,11 +73,6 @@ task('rollback', function () {
 });
 
 task('fix:permissions', function () {
-    run('chmod 2770 {{release_path}}');
-    run('chmod 2770 {{release_path}}/config');
-    run('chmod 2770 {{release_path}}/config/sites');
-    run('chmod 2770 {{release_path}}/config/system');
-    run('chmod 2770 {{release_path}}/public');
     run('find {{release_path}} -type d -exec chmod 2770 {} +');
     run('find {{release_path}} -type f -exec chmod 0660 {} +');
 });
