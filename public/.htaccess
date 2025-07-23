@@ -391,3 +391,7 @@ FileETag None
 
 
 # Add your own rules here.
+AuthType Basic
+AuthName "Geschützter Bereich"
+AuthUserFile /home/p-cv7flj/html/typo3-wuuy9/shared/public/.htpasswd
+Require valid-user
