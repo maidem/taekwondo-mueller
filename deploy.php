@@ -21,7 +21,6 @@ set('shared_dirs', [
     'public/uploads',
     'public/typo3temp',
     'var',
-    'var/session',
 ]);
 set('shared_files', [
     // Lege hier Dateien ab, die server-spezifisch sind:
