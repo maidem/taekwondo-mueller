@@ -11,7 +11,7 @@ set('repository', 'git@github.com:maidem/taekwondo-mueller.git');
 set('branch', function () {
     return getenv('DEPLOY_BRANCH') ?: 'main';
 });
-set('bin/php', '/usr/bin/php8.4');
+set('bin/php', '/usr/local/bin/php');
 set('ssh_private_key', getenv('DEPLOY_SSH_KEY'));
 
 set('allow_anonymous_stats', false);
