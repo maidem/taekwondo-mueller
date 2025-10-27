@@ -29,6 +29,16 @@ jobs:
           chmod 600 ~/.ssh/id_deploy
           ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
 
+      - name: Unlock previous deployment (if locked)
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_SSH_USER: ${{ secrets.DEPLOY_SSH_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_deploy
+          vendor/bin/dep deploy:unlock live || true
+
       - name: Deploy with TYPO3 Recipe
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
