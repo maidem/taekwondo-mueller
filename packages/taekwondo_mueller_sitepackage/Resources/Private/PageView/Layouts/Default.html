@@ -2,40 +2,50 @@
     data-namespace-typo3-fluid="true"
     xmlns:vite="http://typo3.org/ns/Praetorius/ViteAssetCollector/ViewHelpers"
 >
-    <ul>
-        <f:for each="{mainnavigation}" as="mainnavigationItem">
-            <li
-                class="{f:if(condition: mainnavigationItem.active, then:'active')}"
-            >
-                <a
-                    href="{mainnavigationItem.link}"
-                    target="{mainnavigationItem.target}"
-                    title="{mainnavigationItem.title}"
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Taekwondo Müller</title>
+        <vite:asset
+            entry="EXT:taekwondo_mueller_sitepackage/Resources/Private/Main.entry.js"
+        />
+    </head>
+    <body>
+        <ul>
+            <f:for each="{mainnavigation}" as="mainnavigationItem">
+                <li
+                    class="{f:if(condition: mainnavigationItem.active, then:'active')}"
                 >
-                    {mainnavigationItem.title}
-                </a>
-                <f:if condition="{mainnavigationItem.children}">
-                    <ul>
-                        <f:for each="{mainnavigationItem.children}" as="child">
-                            <li
-                                class="{f:if(condition: child.active, then:'active')}"
+                    <a
+                        href="{mainnavigationItem.link}"
+                        target="{mainnavigationItem.target}"
+                        title="{mainnavigationItem.title}"
+                    >
+                        {mainnavigationItem.title}
+                    </a>
+                    <f:if condition="{mainnavigationItem.children}">
+                        <ul>
+                            <f:for
+                                each="{mainnavigationItem.children}"
+                                as="child"
                             >
-                                <a
-                                    href="{child.link}"
-                                    target="{child.target}"
-                                    title="{child.title}"
+                                <li
+                                    class="{f:if(condition: child.active, then:'active')}"
                                 >
-                                    {child.title}
-                                </a>
-                            </li>
-                        </f:for>
-                    </ul>
-                </f:if>
-            </li>
-        </f:for>
-    </ul>
-    <f:render section="Main" />
-    <vite:asset
-        entry="EXT:taekwondo_mueller_sitepackage/Resources/Private/Main.entry.js"
-    />
+                                    <a
+                                        href="{child.link}"
+                                        target="{child.target}"
+                                        title="{child.title}"
+                                    >
+                                        {child.title}
+                                    </a>
+                                </li>
+                            </f:for>
+                        </ul>
+                    </f:if>
+                </li>
+            </f:for>
+        </ul>
+        <f:render section="Main" />
+    </body>
 </html>

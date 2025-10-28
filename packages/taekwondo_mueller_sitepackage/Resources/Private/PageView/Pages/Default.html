@@ -1,19 +1,18 @@
 <f:layout name="Default" />
 <f:section name="Main">
-
-    <div style="background-color: yellow; padding: 0.5em 1em;">
-        <dl>
-            <dt>Template file</dt>
-            <dd>
-                <code>packages/taekwondo_mueller_sitepackage/Resources/Private/PageView/Pages/Default.html</code>
-            </dd>
-            <dt>Backend Configuration</dt>
-            <dd>
-                <code>packages/taekwondo_mueller_sitepackage/Configuration/Sets/SitePackage/PageTsConfig/BackendLayouts/default.tsconfig</code>
-            </dd>
-        </dl>
+    <p>
+        <button
+            class="btn btn-primary"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#testCollapse"
+        >
+            Toggle Collapse
+        </button>
+    </p>
+    <div class="collapse" id="testCollapse">
+        <div class="card card-body">Hallo Master Müller 👋</div>
     </div>
 
-    <f:render partial="Content" arguments="{records: content.main.records}"/>
-
+    <f:render partial="Content" arguments="{records: content.main.records}" />
 </f:section>

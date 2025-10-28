@@ -1,1 +1,1 @@
-["../Resources/Private/*.entry.js"]
+["../Resources/Private/Main.entry.scss", "../Resources/Private/Main.entry.js"]

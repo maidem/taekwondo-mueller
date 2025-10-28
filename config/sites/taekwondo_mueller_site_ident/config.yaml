@@ -1,4 +1,4 @@
-base: German
+base: /
 dependencies:
   - maidem/taekwondo-mueller-sitepackage
   - typo3/fluid-styled-content
