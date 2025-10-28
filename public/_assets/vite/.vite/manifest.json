@@ -1,19 +1,11 @@
 {
   "packages/taekwondo_mueller_sitepackage/Resources/Private/Main.entry.js": {
-    "file": "assets/Main.entry-BPpIAOtf.js",
+    "file": "assets/Main.entry-CSvb7yYp.js",
     "name": "Main.entry",
     "src": "packages/taekwondo_mueller_sitepackage/Resources/Private/Main.entry.js",
     "isEntry": true,
     "css": [
       "assets/Main-C3HNudsK.css"
-    ]
-  },
-  "packages/taekwondo_mueller_sitepackage/Resources/Private/Main.entry.scss": {
-    "file": "assets/Main-C3HNudsK.css",
-    "src": "packages/taekwondo_mueller_sitepackage/Resources/Private/Main.entry.scss",
-    "isEntry": true,
-    "names": [
-      "Main.css"
     ]
   }
 }
