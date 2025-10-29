@@ -62,3 +62,7 @@ page {
         taekwondo_mueller_sitepackage_scripts = EXT:taekwondo_mueller_sitepackage/Resources/Public/JavaScript/main.js
     }
 }
+
+@import 'EXT:taekwondo_mueller_sitepackage/Configuration/SET/Sitepackage/TypoScript/ThreeColumnContainer.typoscript'
+@import 'EXT:taekwondo_mueller_sitepackage/Configuration/SET/Sitepackage/TypoScript/TwoColumnContainer.typoscript'
+

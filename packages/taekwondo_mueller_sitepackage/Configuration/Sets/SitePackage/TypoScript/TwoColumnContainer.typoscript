@@ -1,0 +1,10 @@
+tt_content.two-column-container < lib.contentElement
+tt_content.two-column-container {
+    templateName = TwoColumnContainer
+    templateRootPaths {
+        10 = EXT:taekwondo_mueller_sitepackage/Resources/Private/PageView/ContentElements/
+    }
+    dataProcessing {
+        100 = B13\Container\DataProcessing\ContainerProcessor
+    }
+}

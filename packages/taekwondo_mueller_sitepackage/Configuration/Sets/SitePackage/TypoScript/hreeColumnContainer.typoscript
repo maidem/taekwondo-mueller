@@ -1,0 +1,11 @@
+tt_content.three-column-container < lib.contentElement
+tt_content.three-column-container {
+    templateName = ThreeColumnContainer
+    templateRootPaths {
+        10 = EXT:taekwondo_mueller_sitepackage/Resources/Private/PageView/ContentElements/
+    }
+    dataProcessing {
+        100 = B13\Container\DataProcessing\ContainerProcessor
+    }
+}
+

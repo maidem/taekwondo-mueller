@@ -1,11 +1,11 @@
 {
   "packages/taekwondo_mueller_sitepackage/Resources/Private/Main.entry.js": {
-    "file": "assets/Main.entry-CSvb7yYp.js",
+    "file": "assets/Main.entry-DK3mCXm1.js",
     "name": "Main.entry",
     "src": "packages/taekwondo_mueller_sitepackage/Resources/Private/Main.entry.js",
     "isEntry": true,
     "css": [
-      "assets/Main-C3HNudsK.css"
+      "assets/Main-BAkjFH1-.css"
     ]
   }
 }

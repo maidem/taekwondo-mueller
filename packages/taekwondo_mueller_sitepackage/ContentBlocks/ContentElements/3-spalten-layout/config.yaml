@@ -1,0 +1,8 @@
+name: taekwondo-mueller/3-spalten-layout
+typeName: taekwondomueller_3spaltenlayout
+group: default
+prefixFields: true
+prefixType: full
+fields:
+  - identifier: header
+    useExistingField: true
