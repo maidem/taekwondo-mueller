@@ -1,4 +1,4 @@
-name: taekwondo_mueller_sitepackage
+name: maidem/taekwondo-mueller-sitepackage
 label: "Taekwondo-Mueller-Sitepackage"
 dependencies:
   - typo3/fluid-styled-content

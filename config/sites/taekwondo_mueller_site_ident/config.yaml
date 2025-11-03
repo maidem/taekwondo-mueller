@@ -1,6 +1,6 @@
 base: /
 dependencies:
-  - taekwondo_mueller_sitepackage
+  - maidem/taekwondo-mueller-sitepackage
   - typo3/fluid-styled-content
   - typo3/fluid-styled-content-css
   - typo3/form
