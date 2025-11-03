@@ -1,18 +1,4 @@
 <f:layout name="Default" />
 <f:section name="Main">
-    <p>
-        <button
-            class="btn btn-primary"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#testCollapse"
-        >
-            Toggle Collapse
-        </button>
-    </p>
-    <div class="collapse" id="testCollapse">
-        <div class="card card-body">Hallo Master Müller 👋</div>
-    </div>
-
     <f:render partial="Content" arguments="{records: content.main.records}" />
 </f:section>

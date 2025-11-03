@@ -43,7 +43,7 @@ page {
     }
 
     includeCSS {
-        taekwondo_mueller_sitepackage_layout = EXT:taekwondo_mueller_sitepackage/Resources/Public/Css/layout.css
+        
     }
 
     includeJSLibs {
@@ -59,7 +59,7 @@ page {
     }
 
     includeJSFooter {
-        taekwondo_mueller_sitepackage_scripts = EXT:taekwondo_mueller_sitepackage/Resources/Public/JavaScript/main.js
+    
     }
 }
 

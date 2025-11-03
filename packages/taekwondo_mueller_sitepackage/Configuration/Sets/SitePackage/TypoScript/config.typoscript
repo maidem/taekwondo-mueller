@@ -34,3 +34,21 @@ config {
     concatenateJs = 0
     concatenateCss = 0
 }
+
+lib.languageMenu = HMENU
+lib.languageMenu {
+  special = language
+  special.value = 0,1
+  1 = TMENU
+  1 {
+    NO = 1
+    NO {
+      allWrap = <li>|</li>
+      ATagTitle.field = title
+      stdWrap.override.field = title
+      linkWrap = |
+    }
+    ACT < .NO
+    ACT.wrapItemAndSub = <li class="active">|</li>
+  }
+}
